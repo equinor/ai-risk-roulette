@@ -152,6 +152,27 @@
     }
     .bulb.unlit { filter: grayscale(100%) brightness(0.9); }
     @media (max-width: 560px) {
+      .wrap { padding: 28px 16px 48px; }
+      .page-title,
+      .page-subtitle {
+        position: static;
+        left: auto;
+        top: auto;
+        transform: none;
+        width: 100%;
+      }
+      .page-title {
+        margin: 8px 0 0;
+        font-size: 22px;
+        text-align: center;
+      }
+      .page-subtitle {
+        margin: 8px auto 18px;
+        font-size: 14px;
+        line-height: 1.4;
+        max-width: 92vw;
+        text-align: center;
+      }
       .card { padding: 48px 28px; }
       .btn { width: 100%; }
     }
