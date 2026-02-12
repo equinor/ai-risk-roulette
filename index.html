@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Risk Roulette</title>
+  <style>
+    :root {
+      --bg: #f6f4ef;
+      --card: #ffffff;
+      --text: #1c1b19;
+      --muted: #8b8b86;
+      --accent: #3a67ff;
+      --button: #101010;
+      --button-text: #fdfdfb;
+      --circle: #f3f3ed;
+      --shadow: 0 20px 60px rgba(0,0,0,0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(1200px 700px at 10% 10%, #fdfbf6 0%, #f6f4ef 55%, #efece6 100%);
+      color: var(--text);
+      font-family: "Palatino", "Palatino Linotype", "Book Antiqua", serif;
+    }
+    .wrap {
+      width: min(920px, 92vw);
+      text-align: center;
+      padding: 48px 16px 64px;
+    }
+    .page-title {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 28px;
+      letter-spacing: 0.0em;
+      color: #8a8984;
+      pointer-events: none;
+    }
+    .page-subtitle {
+      position: fixed;
+      top: 46px;
+      margin-top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 18px;
+      line-height: 150%;
+      letter-spacing: 0.0em;
+      color: #9a9994;
+      pointer-events: none;
+      max-width: 78vw;
+      text-align: center;
+    }
+    .card {
+      position: relative;
+      background: var(--card);
+      padding: 64px 56px;
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      border: 1px solid #efede8;
+      min-height: 260px;
+      display: grid;
+      place-items: center;
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+    .card:hover {
+      box-shadow: 0 24px 70px rgba(0,0,0,0.14);
+    }
+    .card-text {
+      font-size: clamp(28px, 3.6vw, 44px);
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+    .info-dot {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--circle);
+      opacity: 0;
+      transition: opacity 200ms ease;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+    .card:hover .info-dot { opacity: 1; }
+    .btn {
+      margin-top: 26px;
+      border: none;
+      padding: 16px 28px;
+      border-radius: 999px;
+      background: var(--button);
+      color: var(--button-text);
+      font-size: 18px;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: transform 150ms ease, opacity 150ms ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(1px); opacity: 0.9; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: rgba(0,0,0,0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+      padding: 24px;
+    }
+    .modal.open { opacity: 1; pointer-events: auto; }
+    .modal-card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 32px 28px;
+      width: min(520px, 92vw);
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .modal-card h2 {
+      margin: 12px 0 8px;
+      font-size: 22px;
+      font-weight: 600;
+    }
+    .modal-card p {
+      margin: 0;
+      color: #5e5e59;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    .close {
+      margin-top: 18px;
+      border: 1px solid #d9d7d2;
+      background: transparent;
+      border-radius: 999px;
+      padding: 10px 18px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    .bulb {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 6px;
+    }
+    .bulb.unlit { filter: grayscale(100%) brightness(0.9); }
+    @media (max-width: 560px) {
+      .card { padding: 48px 28px; }
+      .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-title">AI Risk Roulette</div>
+  <div class="page-subtitle">Read the <bold>Cool Idea for AI&trade;</bold> and use your judgement to decide <br />if you think it sounds relatively safe or relatively risky.</div>
+  <div class="wrap">
+    <div class="card" id="card">
+      <div class="info-dot" id="infoDot" aria-label="Info"></div>
+      <div class="card-text" id="cardText">Loading…</div>
+    </div>
+    <button class="btn" id="nextBtn">Get another card</button>
+  </div>
+
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <svg class="bulb" id="bulbIcon" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M32 6c-10.5 0-19 8.1-19 18.2 0 6.3 3.3 12 8.6 15.5 1.9 1.3 3.4 3.3 3.9 5.5l.4 1.8h12.1l.4-1.8c.5-2.2 2-4.2 3.9-5.5 5.3-3.5 8.6-9.2 8.6-15.5C51 14.1 42.5 6 32 6z" fill="#ffd332" stroke="#e0b700" stroke-width="1.2"/>
+        <path d="M24 49h16" stroke="#6b6b67" stroke-width="3" stroke-linecap="round"/>
+        <path d="M25.5 55h13" stroke="#6b6b67" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <h2 id="modalTitle">Low risk</h2>
+      <p id="modalText">Lorem ipsum dolor sit amet.</p>
+      <button class="close" id="closeBtn">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const csv = `"use_case","category","note"
+"Propose ideas for workshop activities at your next department gathering.","lit","Brainstorming ideas you will read & evaluate is fairly safe."
+"Based on examples of recent advances in your field, brainstorm new approaches to solving a technical problem.","lit","Brainstorming ideas you will read & evaluate is fairly safe. Providing some examples will probably improve the quality and relevance."
+"Suggest questions to help you prepare for a Q&A session at a conference.","lit","Exploring ideas you will read & evaluate is fairly safe."
+"Add category tags to 25,000 articles to help find or group them.","lit","Consequences of errors are small. The average performance is much more important than each specific example."
+"Find and compare corresponding paragraphs in an English document and its Norwegian translation.","lit","Highlighting differences, not quoting text or maknig changes, will assist you in the comparison and reduce the chances of omissions."
+"Identify and highlight differences between specific passages in two documents.","lit","Highlighting differences, not quoting text or maknig changes, will assist you in the comparison and reduce the chances of omissions."
+"Unify the formatting of academic references in 10,000 documents.","lit","A difficult task almost impossible to perform another way. Consequences of errors are small."
+"Suggest improvements to your resumé to better match a job description.","lit","Assistance for you on a personal task. You will read and assess the suggestions."
+"Identify and rank internal job descriptions based on your resumé.","lit","Assistance for you on a personal task. You will read and assess the suggestions."
+"Suggest language improvements to an email or instant message you are writing to your boss.","lit","You will read and assess the suggestions."
+"Generate code to implement a well-known equation in your professional field.","lit","The relationship is well known, and known to you as a professional. You will likely catch errors."
+"Analyse 200,000 documents for mentions of people, places or dates, to help with a competitive analysis task.","lit","Consequences of errors are small. The average performance is much more important than each specific example."
+"Find mentions of the energy industry in 500,000 documents written in 13 languages.","lit","Consequences of errors are small. The average performance is much more important than each specific example."
+"Get advice about the stress and anxiety you are experiencing at work.","unlit","Potentially unsafe, it's more advisable to consult a friend or mental health professional."
+"Draft, flesh out, then polish a strategic plan for your business area for the next 12 to 18 months.","unlit","Doing the entire task, especially something involving insight and reasoning, is risky."
+"Turn ordinary sentences into SQL, a language you don't know, in order to query a database.","unlit","Asking for output you do not understand well enough to check is risky."
+"Simplify the language in lengthy legal documents, to make them easier to read.","unlit","Do not process legal language unless you are a lawyer."
+"Create a complete, formatted document from images of handwritten notes.","unlit","Unless the document is very short, it would be safer to create a first draft yourself."
+"Summarize and combine daily notes and memos into a final report for a regulator.","unlit","Producing documentation for a regulator is risky."
+"Rank resumés of applicants by scoring how well they compare to the job description.","unlit","AI is biased and inscrutible, so processing other people's personal data may be unfair. The consequences of an error may be substantial."
+"Write employee performance reviews based on feedback from their colleagues.","unlit","AI is biased and inscrutable, so processing other people's personal data may be unfair. The consequences of an error may be substantial."
+"Summarize data tables in the annual report for a press release.","unlit","Producing documentation for public consumption is risky. Processing quantitative data is risky."
+"Translate sales contracts from Portuguese to Norwegian.","unlit","Do not process legal language unless you are a lawyer. The consequences of errors are substantial."
+"Create job descriptions for every role in the company.","unlit","AI is biased and inscrutable, and there is no model with good knowledge of the company. The job is too large to check."
+"Create a communications bot to answer questions from the press and public.","unlit","Producing text for public consumption is risky. The company is liable for its errors."
+"Update the emergency response manuals for all sites & properties, based on new requirements.","unlit","Emergency response is a safety critical function, the consequences of errors are substantial. The job is too large to check."`;
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let field = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        const next = text[i + 1];
+        if (c === '"') {
+          if (inQuotes && next === '"') {
+            field += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (c === ',' && !inQuotes) {
+          row.push(field);
+          field = "";
+        } else if ((c === '\n' || c === '\r') && !inQuotes) {
+          if (c === '\r' && next === '\n') i++;
+          row.push(field);
+          if (row.length > 1) rows.push(row);
+          row = [];
+          field = "";
+        } else {
+          field += c;
+        }
+      }
+      if (field.length || row.length) {
+        row.push(field);
+        if (row.length > 1) rows.push(row);
+      }
+      return rows.slice(1).map(r => ({
+        useCase: r[0],
+        category: r[1],
+        note: r[2]
+      }));
+    }
+
+    const data = parseCSV(csv);
+    const cardText = document.getElementById('cardText');
+    const infoDot = document.getElementById('infoDot');
+    const nextBtn = document.getElementById('nextBtn');
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalText = document.getElementById('modalText');
+    const bulbIcon = document.getElementById('bulbIcon');
+    const closeBtn = document.getElementById('closeBtn');
+
+    let current = null;
+    let deck = [];
+    let deckIndex = 0;
+
+    function shuffle(list) {
+      for (let i = list.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [list[i], list[j]] = [list[j], list[i]];
+      }
+    }
+
+    function resetDeck() {
+      deck = data.slice();
+      shuffle(deck);
+      deckIndex = 0;
+    }
+
+    function pickRandom() {
+      if (!deck.length || deckIndex >= deck.length) {
+        resetDeck();
+      }
+      current = deck[deckIndex];
+      deckIndex += 1;
+      cardText.textContent = current.useCase;
+    }
+
+    function openModal() {
+      if (!current) return;
+      const isLit = current.category === 'lit';
+      bulbIcon.classList.toggle('unlit', !isLit);
+      modalTitle.textContent = isLit ? 'Low risk' : 'Risky';
+      modalText.textContent = current.note;
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeModal() {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    nextBtn.addEventListener('click', pickRandom);
+    infoDot.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    pickRandom();
+  </script>
+</body>
+</html>
