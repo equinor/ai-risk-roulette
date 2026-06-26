@@ -1,4 +1,7 @@
 # ai-risk-roulette
+
+**ARCHIVED** — this is now part of [`figgy`](https://github.com/equinor/ai-risk-roulette)
+
 A card deck of Cool Ideas for AI... but are they cool?
 
 <img width="1181" height="953" alt="image" src="https://github.com/user-attachments/assets/a77fc123-227d-4a51-a4ed-8931da5cbcc8" />
