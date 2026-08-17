@@ -1,6 +1,6 @@
 # ai-risk-roulette
 
-**ARCHIVED** — this is now part of [`figgy`](https://github.com/equinor/ai-risk-roulette)
+**ARCHIVED** — this is now part of [`figgy`](https://github.com/equinor/figgy)
 
 A card deck of Cool Ideas for AI... but are they cool?
 
